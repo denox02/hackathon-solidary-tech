@@ -1,0 +1,71 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: donation-service
+  namespace: default
+  labels:
+    app: donation-service
+    project: solidary-tech
+spec:
+  replicas: 3 # Alta disponibilidade para aguentar o Hot Path
+  selector:
+    matchLabels:
+      app: donation-service
+  template:
+    metadata:
+      labels:
+        app: donation-service
+    spec:
+      containers:
+      - name: donation-service
+        image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/donation-service:latest
+        
+        # Injeção das variáveis de ambiente a partir do ConfigMap e da Secret
+        env:
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: solidary-tech-config
+              key: DATABASE_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: solidary-tech-config
+              key: DATABASE_PORT
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: solidary-tech-config
+              key: DATABASE_NAME
+        - name: DB_USER
+          valueFrom:
+            configMapKeyRef:
+              name: solidary-tech-config
+              key: DATABASE_USER
+        - name: AWS_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: solidary-tech-config
+              key: AWS_REGION
+        - name: SQS_QUEUE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: solidary-tech-config
+              key: SQS_QUEUE_URL
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: solidary-tech-secrets
+              key: DATABASE_PASSWORD
+
+        # Garantia de FinOps / Rightsizing (Evitando over-provisioning)
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+          limits:
+            cpu: "400m"
+            memory: "512Mi"
+
+        ports:
+        - containerPort: 3000

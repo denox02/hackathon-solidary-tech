@@ -1,0 +1,42 @@
+﻿name: CI/CD DevSecOps - NGO Service
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  security-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Configurar Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+        cache-dependency-path: 'ngo-service/package-lock.json'
+
+    - name: Executar Scan de Segurança de Código (Trivy SCA)
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: 'ngo-service'
+        format: 'table'
+        exit-code: '0'
+        severity: 'CRITICAL,HIGH'
+
+    - name: Instalar Dependências e Testar
+      run: |
+        cd ngo-service
+        npm ci
+        npm test --if-present
+
+    - name: Simular Build da Imagem Docker Otimizada
+      run: |
+        cd ngo-service
+        docker build -t solidary-tech/ngo-service:latest .

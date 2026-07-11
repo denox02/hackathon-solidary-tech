@@ -1,0 +1,24 @@
+﻿name: CI/CD - Core Services (NGO & Volunteer)
+
+on:
+  push:
+    paths:
+      - 'ngo-service/**'
+      - 'volunteer-service/**'
+    branches: [ main, master ]
+
+jobs:
+  validate-and-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: DevSecOps - Security Scan on Core Services
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'table'
+        exit-code: '1'
+        severity: 'CRITICAL,HIGH'

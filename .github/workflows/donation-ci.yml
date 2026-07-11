@@ -1,0 +1,37 @@
+﻿name: CI/CD - Donation Service
+
+on:
+  push:
+    paths:
+      - 'donation-service/**'
+    branches: [ main, master ]
+
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/profiles/node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+        cache-dependency-path: './donation-service/package-lock.json'
+
+    - name: Install Production Dependencies
+      run: |
+        cd donation-service
+        npm ci --only=production
+
+    - name: DevSecOps - File System Vulnerability Scan (Trivy SCA)
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: './donation-service'
+        format: 'table'
+        exit-code: '1' # Trava o pipeline se encontrar vulnerabilidades Críticas ou Altas
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        severity: 'CRITICAL,HIGH'
