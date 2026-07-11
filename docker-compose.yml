@@ -1,0 +1,42 @@
+﻿version: '3.8'
+
+services:
+  # --- CAMADA DE PERSISTÊNCIA LOCAL (Simulando o RDS) ---
+  local-postgres:
+    image: postgres:16-alpine
+    container_name: solidary-postgres-local
+    environment:
+      POSTGRES_DB: solidary_db
+      POSTGRES_USER: solidary_admin
+      POSTGRES_PASSWORD: MudarSenhaForte123!
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_local_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U solidary_admin -d solidary_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- CAMADA DE MENSAGERIA LOCAL (Simulando o AWS SQS FIFO via LocalStack) ---
+  localstack:
+    image: localstack/localstack:latest
+    container_name: solidary-aws-local
+    ports:
+      - "4566:4566"            # Porta padrão para todos os serviços da AWS local
+    environment:
+      - SERVICES=sqs           # Levanta apenas o serviço de SQS para economizar memória
+      - AWS_DEFAULT_REGION=us-east-1
+    volumes:
+      # Monta o script de inicialização automática das filas FIFO
+      - ./local-env/init-localstack.sh:/etc/localstack/init/ready.d/init-localstack.sh
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  postgres_local_data:
+    driver: local
