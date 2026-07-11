@@ -1,0 +1,27 @@
+﻿apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-isolation-policy
+  namespace: default
+  labels:
+    project: solidary-tech
+spec:
+  podSelector: {} # Aplica-se a TODOS os pods do namespace default
+  policyTypes:
+  - Ingress
+  
+  # Regras de Entrada Permitidas
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: donation-service
+    - podSelector:
+        matchLabels:
+          app: ngo-service
+    - podSelector:
+        matchLabels:
+          app: volunteer-service
+    ports:
+    - protocol: TCP
+      port: 3000 # Só permite comunicação interna nas portas das APIs
