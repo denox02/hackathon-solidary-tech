@@ -10,8 +10,9 @@ spec:
   policyTypes:
   - Ingress
   
-  # Regras de Entrada Permitidas
+  # Regras de Entrada Permitidas (Least Privilege Architecture)
   ingress:
+  # 1. Permite comunicação cruzada entre as próprias APIs do ecossistema
   - from:
     - podSelector:
         matchLabels:
@@ -24,4 +25,13 @@ spec:
           app: volunteer-service
     ports:
     - protocol: TCP
-      port: 3000 # Só permite comunicação interna nas portas das APIs
+      port: 3000
+
+  # 2. LIBERAÇÃO SRE: Permite que o OpenTelemetry Collector acesse as APIs para coletar métricas
+  - from:
+    - podSelector:
+        matchLabels:
+          app: otel-collector
+    ports:
+    - protocol: TCP
+      port: 3000

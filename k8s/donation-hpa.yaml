@@ -10,13 +10,21 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: donation-service # Alvo do escalonamento automático
+    name: donation-service
   minReplicas: 2
   maxReplicas: 10
   metrics:
+  # 1. Escalonamento por utilização de CPU
   - type: Resource
     resource:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: 70 # Escala se o uso médio de CPU passar de 70%
+        averageUtilization: 70
+  # 2. Escalonamento por utilização de Memória (Proteção contra OOM Kill)
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80 # Escala se a média de RAM passar de 80%

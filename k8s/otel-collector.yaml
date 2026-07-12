@@ -1,0 +1,67 @@
+﻿apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: default
+spec:
+  data:
+    otel-collector-config.yaml: |
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+            http:
+
+      processors:
+        batch:
+          timeout: 10s
+
+      exporters:
+        # --- INTEGRAÇÃO COM DATADOG APM ---
+        datadog:
+          api:
+            key: "${DD_API_KEY}" # Puxa a chave de forma segura via Secret
+          site: "datadoghq.com"
+
+      service:
+        pipelines:
+          metrics:
+            receivers: [otlp]
+            processors: [batch]
+            exporters: [datadog]
+          traces:
+            receivers: [otlp]
+            processors: [batch]
+            exporters: [datadog]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel-collector
+  template:
+    metadata:
+      labels:
+        app: otel-collector
+    spec:
+      containers:
+      - name: otel-collector
+        image: otel/opentelemetry-collector-contrib:latest
+        env:
+        - name: DD_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: solidary-tech-secrets
+              key: DATADOG_API_KEY
+        volumeMounts:
+        - name: collector-config-vol
+          mountPath: /etc/otelcol-contrib
+      volumes:
+      - name: collector-config-vol
+        configMap:
+          name: otel-collector-config
