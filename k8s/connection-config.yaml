@@ -9,6 +9,7 @@ data:
   DB_HOST: "solidary-tech-db.cb8va61p7pvp.us-east-1.rds.amazonaws.com"
   DB_PORT: "5432"
   DB_NAME: "solidary_db"
+  DATABASE_URL: "postgresql://solidary_admin:MudarSenhaForte123!@solidary-tech-db.cb8va61p7pvp.us-east-1.rds.amazonaws.com:5432/solidary_db"
 ---
 apiVersion: v1
 kind: Secret
@@ -31,5 +32,6 @@ metadata:
     project: solidary-tech
 type: Opaque
 stringData:
-  # Digite sua API Key real do Datadog aqui antes de subir para o cluster
-  DATADOG_API_KEY: "SUA_API_KEY_AQUI"
+  DATABASE_PASSWORD: "MudarSenhaForte123!"
+  DATABASE_URL: "postgresql://solidary_admin:MudarSenhaForte123!@solidary-tech-db.cb8va61p7pvp.us-east-1.rds.amazonaws.com:5432/solidary_db"
+  DATADOG_API_KEY: "SUA_CHAVE_REAL_DO_DATADOG_AQUI"

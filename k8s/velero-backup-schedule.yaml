@@ -1,4 +1,4 @@
-ÔªøapiVersion: velero.io/v1
+apiVersion: velero.io/v1
 kind: Schedule
 metadata:
   name: solidary-tech-daily-backup
@@ -7,14 +7,14 @@ metadata:
     project: solidary-tech
     component: disaster-recovery
 spec:
-  # Cron Expression: Executa todos os dias √† meia-noite (00:00 UTC)
+  # Cron Expression: Executa todos os dias ‡ meia-noite (00:00 UTC)
   schedule: "0 0 * * *"
   
-  # Mant√©m os backups guardados por 30 dias (720 horas) antes de expirar (FinOps)
+  # MantÈm os backups guardados por 30 dias (720 horas) antes de expirar (FinOps)
   template:
     ttl: 720h0m0s
     
-    # Inclui todos os recursos do namespace default (onde est√£o nossas APIs)
+    # Inclui todos os recursos do namespace default (onde est„o nossas APIs)
     includedNamespaces:
     - default
     

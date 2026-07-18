@@ -1,4 +1,4 @@
-ï»¿apiVersion: monitoring.coreos.com/v1
+apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: solidary-tech-aiops-alerts
@@ -11,7 +11,7 @@ spec:
   - name: solidary-tech-sre-rules
     rules:
     
-    # 1. DETECÃ‡ÃƒO PREDITIVA (AIOps): PrevisÃ£o de esgotamento de disco antes de acontecer
+    # 1. DETECÇÃO PREDITIVA (AIOps): Previsão de esgotamento de disco antes de acontecer
     - alert: DiskSpaceFillingPredictive
       expr: predict_linear(node_filesystem_free_bytes{job="node-exporter"}[1h], 28800) < 0
       for: 15m
@@ -19,10 +19,10 @@ spec:
         severity: warning
         tier: itsm
       annotations:
-        summary: "PrevisÃ£o de esgotamento de disco no nÃ³ do cluster"
-        description: "Com base no comportamento de escrita das Ãºltimas horas, o disco deve atingir 100% de capacidade nas prÃ³ximas 8 horas. AÃ§Ã£o preventiva necessÃ¡ria."
+        summary: "Previsão de esgotamento de disco no nó do cluster"
+        description: "Com base no comportamento de escrita das últimas horas, o disco deve atingir 100% de capacidade nas próximas 8 horas. Ação preventiva necessária."
 
-    # 2. SEVERIDADE DE SRE (Hot Path): Taxa de erro crÃ­tica estourando o Error Budget do SLO
+    # 2. SEVERIDADE DE SRE (Hot Path): Taxa de erro crítica estourando o Error Budget do SLO
     - alert: DonationServiceHighErrorRate
       expr: sum(rate(http_requests_total{app="donation-service", status=~"5.."}[5m])) / sum(rate(http_requests_total{app="donation-service"}[5m])) * 100 > 1
       for: 2m
@@ -31,9 +31,9 @@ spec:
         tier: sre
       annotations:
         summary: "Taxa de erro HTTP acima de 1% no Hot Path (donation-service)"
-        description: "O serviÃ§o de doaÃ§Ãµes estÃ¡ apresentando uma taxa de erro de 5xx maior que 1% nos Ãºltimos 2 minutos. Risco imediato de violaÃ§Ã£o do SLO."
+        description: "O serviço de doações está apresentando uma taxa de erro de 5xx maior que 1% nos últimos 2 minutos. Risco imediato de violação do SLO."
 
-    # 3. ANOMALIA DE LATÃŠNCIA: LentidÃ£o extrema na resposta das doaÃ§Ãµes
+    # 3. ANOMALIA DE LATÊNCIA: Lentidão extrema na resposta das doações
     - alert: DonationServiceLatencyViolation
       expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{app="donation-service"}[5m])) by (le)) > 2.0
       for: 5m
@@ -41,5 +41,5 @@ spec:
         severity: warning
         tier: sre
       annotations:
-        summary: "LatÃªncia P95 do donation-service acima de 2 segundos"
-        description: "95% das requisiÃ§Ãµes de doaÃ§Ãµes estÃ£o levando mais de 2 segundos para processar. Impacto na experiÃªncia do doador detectado pelo pipeline de telemetria."
+        summary: "Latência P95 do donation-service acima de 2 segundos"
+        description: "95% das requisições de doações estão levando mais de 2 segundos para processar. Impacto na experiência do doador detectado pelo pipeline de telemetria."
