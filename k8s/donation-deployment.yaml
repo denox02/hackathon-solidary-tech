@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: donation-service
-  namespace: default
+  namespace: production
   labels:
     app: donation-service
     project: solidary-tech
@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: donation-service
-        image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/donation-service:latest
+        image: 396368123600.dkr.ecr.us-east-1.amazonaws.com/donation-service:latest
         
         # Injeta automaticamente as variáveis: DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS
         envFrom:
@@ -76,7 +76,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: donation-service
-  namespace: default
+  namespace: production
   labels:
     app: donation-service
 spec:

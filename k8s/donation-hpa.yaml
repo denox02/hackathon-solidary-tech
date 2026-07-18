@@ -1,8 +1,8 @@
-ï»¿apiVersion: autoscaling/v2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: donation-service-hpa
-  namespace: default
+  namespace: production
   labels:
     app: donation-service
     project: solidary-tech
@@ -14,17 +14,17 @@ spec:
   minReplicas: 2
   maxReplicas: 10
   metrics:
-  # 1. Escalonamento por utilizaÃ§Ã£o de CPU
+  # 1. Escalonamento por utilização de CPU
   - type: Resource
     resource:
       name: cpu
       target:
         type: Utilization
         averageUtilization: 70
-  # 2. Escalonamento por utilizaÃ§Ã£o de MemÃ³ria (ProteÃ§Ã£o contra OOM Kill)
+  # 2. Escalonamento por utilização de Memória (Proteção contra OOM Kill)
   - type: Resource
     resource:
       name: memory
       target:
         type: Utilization
-        averageUtilization: 80 # Escala se a mÃ©dia de RAM passar de 80%
+        averageUtilization: 80 # Escala se a média de RAM passar de 80%

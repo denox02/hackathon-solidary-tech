@@ -1,8 +1,8 @@
-ÔªøapiVersion: v1
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: otel-collector-config
-  namespace: default
+  namespace: production
 spec:
   data:
     otel-collector-config.yaml: |
@@ -17,7 +17,7 @@ spec:
           timeout: 10s
 
       exporters:
-        # --- INTEGRA√á√ÉO COM DATADOG APM ---
+        # --- INTEGRA«√O COM DATADOG APM ---
         datadog:
           api:
             key: "${DD_API_KEY}" # Puxa a chave de forma segura via Secret
@@ -38,7 +38,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: otel-collector
-  namespace: default
+  namespace: production
 spec:
   replicas: 1
   selector:
@@ -65,3 +65,20 @@ spec:
       - name: collector-config-vol
         configMap:
           name: otel-collector-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: production
+spec:
+  type: ClusterIP
+  ports:
+  - name: otlp-grpc
+    port: 4317
+    targetPort: 4317
+  - name: otlp-http
+    port: 4318
+    targetPort: 4318
+  selector:
+    app: otel-collector

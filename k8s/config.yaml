@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: solidary-tech-config
+  namespace: production
+data:
+  DB_HOST: "solidary-tech-postgres-endpoint" # Será substituído pelo DNS do RDS amanhã
+  DB_PORT: "5432"
+  DB_NAME: "solidary_tech"
+  AWS_REGION: "us-east-1"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: solidary-tech-secret
+  namespace: production
+type: Opaque
+stringData:
+  DB_USER: "postgres"
+  DB_PASSWORD: "SenhaSuperSeguraDoHackathon123"
