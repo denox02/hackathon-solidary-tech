@@ -4,35 +4,43 @@ metadata:
   name: solidary-tech-ingress
   namespace: production
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    # 🟢 Captura o nome do microsserviço ($1) e o restante da rota ($2), limpando o prefixo '/api'
-    nginx.ingress.kubernetes.io/rewrite-target: /$1$2
+    # 1. Indica que o ALB será voltado para a internet (público)
+    alb.ingress.kubernetes.io/scheme: internet-facing
+
+    # 2. Roteamento direto para o IP do Pod (Evita o hop extra do kube-proxy nos nós)
+    alb.ingress.kubernetes.io/target-type: ip
+
+    # 3. Define as portas de entrada que o ALB vai escutar
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+
+    # 4. Configura o Health Check padrão que o ALB vai usar para validar as APIs
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '15'
+    alb.ingress.kubernetes.io/success-codes: '200'
 spec:
-  ingressClassName: nginx
+  # Crucial para o EKS saber qual controller deve assumir esse Ingress
+  ingressClassName: alb
   rules:
   - http:
       paths:
-      - path: /api/(ngos)(.*)
-        pathType: ImplementationSpecific # 🟢 Necessário para o NGINX processar o Regex corretamente
-        backend:
-          service:
-            name: ngo-service
-            port:
-              number: 3000
-
-      - path: /api/(donations)(.*)
-        pathType: ImplementationSpecific
+      - path: /api/donations
+        pathType: Prefix
         backend:
           service:
             name: donation-service
             port:
-              number: 3000
-
-      - path: /api/(volunteers)(.*)
-        pathType: ImplementationSpecific
+              number: 8080
+      - path: /api/ngos
+        pathType: Prefix
+        backend:
+          service:
+            name: ngo-service
+            port:
+              number: 8080
+      - path: /api/volunteers
+        pathType: Prefix
         backend:
           service:
             name: volunteer-service
             port:
-              number: 3000
+              number: 8080
