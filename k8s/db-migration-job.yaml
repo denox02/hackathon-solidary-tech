@@ -32,7 +32,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: db-credentials
-              key: DB_PASSWORD # <--- AJUSTADO: Altere para POSTGRES_PASSWORD se o erro persistir
+              key: DB_PASS # <--- AJUSTADO: Agora usando a chave real encontrada no Secret
         envFrom:
         - configMapRef:
             name: db-config
