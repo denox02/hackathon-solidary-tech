@@ -3,36 +3,35 @@ kind: ConfigMap
 metadata:
   name: otel-collector-config
   namespace: production
-spec:
-  data:
-    otel-collector-config.yaml: |
-      receivers:
-        otlp:
-          protocols:
-            grpc:
-            http:
+data:
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
 
-      processors:
-        batch:
-          timeout: 10s
+    processors:
+      batch:
+        timeout: 10s
 
-      exporters:
-        # --- INTEGRAÇÃO COM DATADOG APM ---
-        datadog:
-          api:
-            key: "${DD_API_KEY}" # Puxa a chave de forma segura via Secret
-          site: "datadoghq.com"
+    exporters:
+      # --- INTEGRAÇÃO COM DATADOG APM ---
+      datadog:
+        api:
+          key: "${DD_API_KEY}"
+        site: "datadoghq.com"
 
-      service:
-        pipelines:
-          metrics:
-            receivers: [otlp]
-            processors: [batch]
-            exporters: [datadog]
-          traces:
-            receivers: [otlp]
-            processors: [batch]
-            exporters: [datadog]
+    service:
+      pipelines:
+        metrics:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [datadog]
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [datadog]
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -65,6 +64,9 @@ spec:
       - name: collector-config-vol
         configMap:
           name: otel-collector-config
+          items:
+          - key: config.yaml      # Pega a chave do ConfigMap
+            path: config.yaml     # Força a criação do arquivo com este nome exato
 ---
 apiVersion: v1
 kind: Service
