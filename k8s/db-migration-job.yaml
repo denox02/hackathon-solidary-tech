@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-init-sql
+  namespace: production
+data:
+  init.sql: |
+    -- ====================================================
+    -- INSIRA SEU SCRIPT SQL REAL ABAIXO SE NECESSÁRIO
+    -- ====================================================
+    CREATE TABLE IF NOT EXISTS ngos (id SERIAL PRIMARY KEY, name VARCHAR(255), email VARCHAR(255));
+    CREATE TABLE IF NOT EXISTS donations (id SERIAL PRIMARY KEY, amount NUMERIC, ngo_id INT);
+    CREATE TABLE IF NOT EXISTS volunteers (id SERIAL PRIMARY KEY, name VARCHAR(255), role VARCHAR(255));
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migration-job
+  namespace: production
+spec:
+  template:
+    spec:
+      containers:
+      - name: postgres-client
+        image: postgres:15-alpine
+        command:
+        - "sh"
+        - "-c"
+        - "psql -h $DB_HOST -U $DB_USER -d $DB_NAME -f /data/init.sql"
+        env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: password # Ajuste para a chave real de senha do seu secret se for diferente (ex: DB_PASSWORD)
+        envFrom:
+        - configMapRef:
+            name: db-config
+        volumeMounts:
+        - name: sql-volume
+          mountPath: /data
+      volumes:
+      - name: sql-volume
+        configMap:
+          name: db-init-sql
+      restartPolicy: OnFailure
+  backoffLimit: 2
